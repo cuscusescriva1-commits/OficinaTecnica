@@ -187,11 +187,33 @@ const STAFF = [
   { id: 'delineante', n: 'Delineante', base: 120, gr: 1.25, hs: 0.5, pay: 1, rep: 0, mil: 1, col: '#3B82C4', d: 'Dibuja planos y detalles.' },
   { id: 'junior', n: 'Ingeniero junior', base: 1100, gr: 1.25, hs: 2.2, pay: 5, rep: 5, mil: 1, col: '#3FA46A', d: 'Calcula estructuras sencillas.' },
   { id: 'revisor', n: 'Revisor técnico', base: 3000, gr: 1.4, hs: 0, pay: 7, rep: 8, col: '#F4F6F8', d: 'Reduce las revisiones del cliente.' },
-  { id: 'jefe', n: 'Jefe de proyecto', base: 6000, gr: 1, hs: 0, pay: 10, rep: 12, max: 1, col: '#2B2F3A', d: 'Acepta encargos por ti. Tiene despacho propio.' },
+  { id: 'jefe', n: 'Jefe de proyecto', base: 6000, gr: 5, hs: 0, pay: 10, rep: 12, max: 1, col: '#2B2F3A', d: 'Acepta encargos por ti. Tiene despacho propio.' },
   { id: 'senior', n: 'Ingeniero senior', base: 9000, gr: 1.25, hs: 11, pay: 30, rep: 40, mil: 1, col: '#E39B1B', d: 'Resuelve los cálculos más duros.' }
 ];
 const SMAP = {}; STAFF.forEach(s => SMAP[s.id] = s);
 const MILES = [5, 10, 20, 40];
+/* Sedes: índice = sedes abiertas. Cada una cambia el edificio, el paisaje y da ventajas permanentes. */
+const MAXSEDE = 10;
+const SEDES = [
+  { n: 'Estudio de barrio', c: 'Cuenca', bg: '#123A5E', fl: ['#DCE5ED', '#EBF1F6'], wl: ['#E9EFF5', '#CFDBE7'], bd: ['#2C6AA3', '#245A8C'], sky: ['#CDEBFA', '#8CCBF0'], k: 0, bl: '#9FC3DC' },
+  { n: 'Oficina en el centro', c: 'Valencia', bg: '#133F57', fl: ['#E1DCCB', '#EEEADB'], wl: ['#F0EDE2', '#DAD5C4'], bd: ['#2A7F86', '#226A70'], sky: ['#D5EFFA', '#9AD3EF'], k: 1, bl: '#8DB3C9' },
+  { n: 'Planta de oficinas', c: 'Madrid', bg: '#16365F', fl: ['#D8DEE6', '#E8EDF3'], wl: ['#EDF1F6', '#D3DCE6'], bd: ['#3B5BA5', '#304C8A'], sky: ['#C6E4FA', '#86BDEB'], k: 2, bl: '#7FA2C4' },
+  { n: 'Torre de cristal', c: 'Barcelona', bg: '#1A3358', fl: ['#D6E2E3', '#E6EEEF'], wl: ['#EAF1F2', '#CBDADD'], bd: ['#1F8A8A', '#187272'], sky: ['#BFE6F5', '#7CC4E4'], k: 3, bl: '#6E97B5' },
+  { n: 'Edificio histórico', c: 'Lisboa', bg: '#2A3358', fl: ['#E3D6C2', '#F0E6D4'], wl: ['#F3E8D6', '#DDCDB5'], bd: ['#B5582E', '#964624'], sky: ['#FFE1B8', '#F6B77A'], k: 2, bl: '#B8896E' },
+  { n: 'Palacete de ingeniería', c: 'París', bg: '#2B2F5E', fl: ['#DAD3E2', '#EAE5F0'], wl: ['#EFEAF4', '#D5CCE0'], bd: ['#6B4FA8', '#573E8C'], sky: ['#E9D6F7', '#B79CE0'], k: 3, bl: '#8A74AE' },
+  { n: 'Rascacielos financiero', c: 'Londres', bg: '#1C2B45', fl: ['#CFD6DE', '#DFE5EB'], wl: ['#DDE3EA', '#C2CCD8'], bd: ['#34495E', '#2A3B4D'], sky: ['#B7C6D8', '#8396AE'], k: 4, bl: '#5E738C' },
+  { n: 'Torre del desierto', c: 'Dubái', bg: '#3A2A3E', fl: ['#EADFC6', '#F5ECD6'], wl: ['#F7EFDB', '#E3D5B6'], bd: ['#C58B1A', '#A57214'], sky: ['#FFD9A0', '#F2994A'], k: 4, bl: '#B98B5C' },
+  { n: 'Jardín vertical', c: 'Singapur', bg: '#0F3A3F', fl: ['#D3E4D7', '#E4F0E7'], wl: ['#E6F2E9', '#C5DCCB'], bd: ['#2E8B57', '#25723F'], sky: ['#9FB8E8', '#5C6FB8'], k: 5, bl: '#3E5A7E' },
+  { n: 'Rascacielos de Manhattan', c: 'Nueva York', bg: '#101C33', fl: ['#C9D0DA', '#D9DFE7'], wl: ['#D6DCE5', '#B8C2CF'], bd: ['#1F2F4D', '#18253D'], sky: ['#26345E', '#0E1630'], k: 5, bl: '#18223F', lit: 1, stars: 1 },
+  { n: 'Campus orbital', c: 'Estación espacial', bg: '#070C1A', fl: ['#C4CBD9', '#D4DAE6'], wl: ['#D2D8E4', '#B5BFCF'], bd: ['#5A2E8A', '#47246D'], sky: ['#0A0E24', '#02040C'], k: 6, bl: '#1B2547', stars: 1, planet: 1 }
+];
+const SEDE_NEED = [15e6, 68e6, 200e6, 900e6, 2.4e9, 7.6e9, 16.5e9, 28.5e9, 44e9, 64e9];
+function sedeNeed(n) { return SEDE_NEED[Math.min(n, SEDE_NEED.length - 1)]; }
+function sedeCap(n) { return n >= MAXSEDE; }
+function maxOf(id) { return id === 'jefe' ? Math.min(4, 1 + Math.floor(S.sedes / 2)) : (SMAP[id].max || 0); }
+function wingMax() { return Math.min(5, 2 + S.sedes); }
+function wingFree(n) { return Math.min(3, Math.floor(n / 2)); }
+function salaMax() { return 4 + Math.min(3, S.sedes); }
 
 const UPG = [
   { id: 'cafe', n: 'Cafetera de oficina', c: 60, rep: 0, prod: 1.1 },
@@ -228,10 +250,14 @@ const GOALS = [
   ['Amplía la oficina 2 veces', 8000, () => S.off, 2],
   ['Contrata a un jefe de proyecto', 16000, () => S.staff.jefe, 1],
   ['Alcanza reputación 50', 40000, () => Math.floor(S.rep), 50],
+  ['Construye una nueva ala del edificio', 50000, () => S.wing, 1],
   ['Ten 10 empleados', 60000, () => D.emp, 10],
   ['Consigue la certificación ISO 9001', 200000, () => S.upg.iso ? 1 : 0, 1],
   ['Alcanza reputación 300', 800000, () => Math.floor(S.rep), 300],
-  ['Abre tu primera sede', 8000000, () => S.sedes, 1]
+  ['Abre tu primera sede', 8000000, () => S.sedes, 1],
+  ['Abre la tercera sede', 150000000, () => S.sedes, 3],
+  ['Abre la quinta sede', 3000000000, () => S.sedes, 5],
+  ['Abre la décima sede', 200000000000, () => S.sedes, 10]
 ];
 
 /* ---- formato ---- */
@@ -265,14 +291,14 @@ function fmtT(s) {
 /* ---- estado ---- */
 function defState() {
   return {
-    v: 2, cash: 0, rep: 0, total: 0, deliv: 0, revs: 0, sedes: 0,
+    v: 2, cash: 0, rep: 0, total: 0, deliv: 0, revs: 0, sedes: 0, wing: 0,
     staff: { delineante: 0, junior: 0, revisor: 0, jefe: 0, senior: 0 },
     off: 0, sala: 0, upg: {}, queue: [null, null, null, null], active: [],
     boss: false, goal: 0, works: [], flags: {}, sound: true, maxLv: 1, seen: Date.now()
   };
 }
 let S = defState();
-const D = { cap: 1, capBase: 1, pay: 0, fee: 1, rev: 1, repm: 1, emp: 0, used: 0, seats: 3, slots: 1 };
+const D = { seatCap: 12, cap: 1, capBase: 1, pay: 0, fee: 1, rev: 1, repm: 1, emp: 0, used: 0, seats: 3, slots: 1 };
 const rt = {
   clock: 0, jid: 1, eligKey: null, refill: [0, 0, 0, 0], searchCd: 0, streak: 0, lastTap: -9, incQ: [], incAcc: 0, incT: 0,
   gift: null, giftNext: 9, bossT: 0, goalCel: -1, sim: false, elT: 0, tapLock: -9, lastSave: 0, popT: {}, newWork: -9
@@ -282,6 +308,7 @@ const H = { // ganchos de efectos (los sobreescribe la interfaz)
 };
 
 function recalc() {
+  BW = 10 + 2.8 * S.wing;
   let hs = 0, pay = 0, emp = 0;
   for (const r of STAFF) {
     const n = S.staff[r.id] || 0; emp += n; pay += r.pay * n;
@@ -289,10 +316,11 @@ function recalc() {
   }
   let prod = 1, fee = 1, rev = 1, repm = 1;
   for (const u of UPG) if (S.upg[u.id]) { prod *= u.prod || 1; fee *= u.fee || 1; rev *= u.rev || 1; repm *= u.repm || 1; }
-  prod *= 1 + 0.25 * S.sedes;
+  prod *= 1 + 0.3 * S.sedes;
+  fee *= (1 + 0.1 * S.sedes) * (1 + 0.08 * Math.max(0, (S.staff.jefe || 0) - 1));
   D.capBase = (1 + hs) * prod; D.cap = D.capBase * (S.cash < 0 ? 0.6 : 1);
   D.pay = pay; D.fee = fee; D.rev = rev; D.repm = repm; D.emp = emp;
-  D.used = emp - (S.staff.jefe || 0); D.seats = 3 + 2 * S.off; D.slots = 1 + S.sala; D.prod = prod;
+  D.used = emp - (S.staff.jefe || 0); D.seatCap = 12 + 4 * S.wing; D.seats = Math.min(D.seatCap, 3 + 2 * S.off); D.slots = 1 + S.sala; D.prod = prod;
 }
 function milCount(id) { const n = S.staff[id] || 0; return MILES.filter(k => n >= k).length; }
 function milMult(id) { return SMAP[id].mil ? Math.pow(1.5, milCount(id)) : 1; }
@@ -405,7 +433,7 @@ function tick(dt) {
   // jefe de proyecto
   if (S.boss && S.staff.jefe > 0 && S.active.length < D.slots) {
     rt.bossT -= dt;
-    if (rt.bossT <= 0) { rt.bossT = rt.sim ? 0 : 0.9; bossPick(); }
+    if (rt.bossT <= 0) { rt.bossT = rt.sim ? 0 : 0.9 / Math.max(1, S.staff.jefe); bossPick(); }
   }
   // recorte de ingresos
   rt.incT -= dt;
@@ -440,7 +468,7 @@ function claimGift() {
 function staffCost(id) { const r = SMAP[id]; return Math.ceil(r.base * Math.pow(r.gr, S.staff[id])); }
 function hireState(id) { // null = se puede; texto = motivo
   const r = SMAP[id];
-  if (r.max && S.staff[id] >= r.max) return 'Ya contratado';
+  const mx = maxOf(id); if (mx && S.staff[id] >= mx) return mx > 1 ? 'Máximo de esta sede' : 'Ya contratado';
   if (S.rep < r.rep) return 'Necesita reputación ' + r.rep;
   if (id !== 'jefe' && D.used >= D.seats) return 'Sin puestos libres';
   return null;
@@ -456,9 +484,14 @@ function hire(id) {
   return true;
 }
 function offCost() { return Math.ceil(300 * Math.pow(1.75, S.off)); }
-function salaCost() { return 3000 * Math.pow(5, S.sala); }
-function buyOffice() { const c = offCost(); if (S.cash < c) return false; S.cash -= c; S.off++; recalc(); H.buy('office'); return true; }
-function buySala() { if (S.sala >= 4) return false; const c = salaCost(); if (S.cash < c) return false; S.cash -= c; S.sala++; recalc(); H.buy('sala'); return true; }
+function salaCost() { return 3000 * Math.pow(S.sala < 4 ? 5 : 8, S.sala); }
+function wingCost() { return Math.ceil(12000 * Math.pow(6, S.wing)); }
+function canOffice() { return D.seats < D.seatCap; }
+function canWing() { return S.wing < wingMax(); }
+function canSala() { return S.sala < salaMax(); }
+function buyOffice() { if (!canOffice()) return false; const c = offCost(); if (S.cash < c) return false; S.cash -= c; S.off++; recalc(); H.buy('office'); return true; }
+function buyWing() { if (!canWing()) return false; const c = wingCost(); if (S.cash < c) return false; S.cash -= c; S.wing++; recalc(); rt.wingT = rt.clock; H.buy('wing'); if (!rt.sim) fitIfWide(); return true; }
+function buySala() { if (!canSala()) return false; const c = salaCost(); if (S.cash < c) return false; S.cash -= c; S.sala++; recalc(); H.buy('sala'); return true; }
 function buyUpg(id) {
   const u = UMAP[id]; if (S.upg[id] || S.rep < u.rep || S.cash < u.c) return false;
   S.cash -= u.c; S.upg[id] = true; rt.popT[id] = rt.clock; recalc(); updateElig(); H.buy(id); return true;
@@ -477,12 +510,12 @@ function cheapestBuy() {
   const add = (c, ok) => { if (ok && (best === null || c < best)) best = c; };
   for (const r of STAFF) if (!hireState(r.id)) add(staffCost(r.id), true);
   for (const u of UPG) if (!S.upg[u.id] && S.rep >= u.rep) add(u.c, true);
-  add(offCost(), true); if (S.sala < 4) add(salaCost(), true);
+  if (canOffice()) add(offCost(), true); if (canWing()) add(wingCost(), true); if (canSala()) add(salaCost(), true);
   return best;
 }
 function anyAffordable(kind) {
   if (kind === 'team') return STAFF.some(r => !hireState(r.id) && S.cash >= staffCost(r.id));
-  return UPG.some(u => !S.upg[u.id] && S.rep >= u.rep && S.cash >= u.c) || S.cash >= offCost() || (S.sala < 4 && S.cash >= salaCost());
+  return UPG.some(u => !S.upg[u.id] && S.rep >= u.rep && S.cash >= u.c) || (canOffice() && S.cash >= offCost()) || (canWing() && S.cash >= wingCost()) || (canSala() && S.cash >= salaCost());
 }
 function nextClientRep() {
   for (let l = 2; l <= 6; l++) if (S.rep < LV[l].rep) return LV[l].rep;
@@ -509,14 +542,16 @@ function claimGoal() {
 }
 
 /* ---- sede ---- */
-function sedePts() { return Math.max(0, Math.floor(Math.sqrt(S.total / 250000)) - S.sedes); }
+function sedeReady() { return !sedeCap(S.sedes) && S.total >= sedeNeed(S.sedes); }
+function sedePts() { return sedeReady() ? 1 : 0; }
 function openSede() {
-  const p = sedePts(); if (p < 1) return false;
-  const keep = { sedes: S.sedes + p, total: S.total, deliv: S.deliv, revs: S.revs, goal: S.goal, works: S.works, flags: S.flags, sound: S.sound };
-  const n = defState(); Object.assign(n, keep, { maxLv: 1 });
+  if (!sedeReady()) return false;
+  const ns = S.sedes + 1;
+  const keep = { sedes: ns, total: S.total, deliv: S.deliv, revs: S.revs, goal: S.goal, works: S.works, flags: S.flags, sound: S.sound };
+  const n = defState(); Object.assign(n, keep, { maxLv: 1, wing: wingFree(ns) });
   S = n; rt.eligKey = null; recalc(); updateElig();
   for (let i = 0; i < 4; i++) S.queue[i] = genJob();
-  rt.goalCel = -1; return p;
+  rt.goalCel = -1; return 1;
 }
 
 /* ---- guardado ---- */
@@ -530,15 +565,16 @@ function normalize(o) {
   if (!o || typeof o !== 'object') return null;
   const d = defState();
   for (const k of ['cash', 'rep', 'total', 'deliv', 'revs', 'sedes', 'off', 'sala', 'goal', 'maxLv', 'seen']) if (Number.isFinite(o[k])) d[k] = o[k];
-  d.rep = Math.max(0, d.rep); d.off = clamp(d.off | 0, 0, 999); d.sala = clamp(d.sala | 0, 0, 4); d.goal = clamp(d.goal | 0, 0, GOALS.length);
-  d.maxLv = clamp(d.maxLv | 0, 1, 6); d.sedes = Math.max(0, d.sedes | 0);
+  d.rep = Math.max(0, d.rep); d.off = clamp(d.off | 0, 0, 999); d.sala = clamp(d.sala | 0, 0, 4 + Math.min(3, d.sedes)); d.goal = clamp(d.goal | 0, 0, GOALS.length);
+  d.maxLv = clamp(d.maxLv | 0, 1, 6); d.sedes = clamp(d.sedes | 0, 0, MAXSEDE);
+  d.wing = clamp(Number.isFinite(o.wing) ? o.wing | 0 : wingFree(d.sedes), 0, Math.min(5, 2 + d.sedes)); if (d.wing < wingFree(d.sedes) && !Number.isFinite(o.wing)) d.wing = wingFree(d.sedes);
   if (o.staff && typeof o.staff === 'object') for (const r of STAFF) if (Number.isFinite(o.staff[r.id])) d.staff[r.id] = Math.max(0, o.staff[r.id] | 0);
-  if (d.staff.jefe > 1) d.staff.jefe = 1;
+  d.staff.jefe = Math.min(d.staff.jefe, 1 + Math.floor(d.sedes / 2), 4);
   if (o.upg && typeof o.upg === 'object') for (const u of UPG) if (o.upg[u.id]) d.upg[u.id] = true;
   if (o.flags && typeof o.flags === 'object') { d.flags.accepted = !!o.flags.accepted; d.flags.tapped = !!o.flags.tapped; }
   d.boss = !!o.boss; d.sound = o.sound !== false;
   if (Array.isArray(o.queue)) for (let i = 0; i < 4; i++) if (okJob(o.queue[i])) { d.queue[i] = cleanJob(o.queue[i]); d.queue[i].done = 0; }
-  if (Array.isArray(o.active)) d.active = o.active.filter(okJob).slice(0, 5).map(cleanJob);
+  if (Array.isArray(o.active)) d.active = o.active.filter(okJob).slice(0, 8).map(cleanJob);
   if (Array.isArray(o.works)) d.works = o.works.filter(w => w && LV[w.lv]).slice(0, 24).map(w => ({ lv: w.lv | 0, name: String(w.name || '').slice(0, 80), fee: Number(w.fee) || 0 }));
   return d;
 }
@@ -592,7 +628,9 @@ const zones = [];
 const items = [];
 const TW = 32, TH = 16;
 const P = (x, y, z) => [(x - y) * TW, (x + y) * TH - (z || 0)];
-const DESKX = [2.2, 5.0, 7.8], DESKY = [1.5, 3.3];
+const DESKX = [2.2, 5.0, 7.8, 10.6, 13.4, 16.2, 19.0, 21.8], DESKY = [1.5, 3.3];
+let BW = 10, TIER = SEDES[0];
+function deskCR(d) { if (d < 6) return [d % 3, Math.floor(d / 3)]; const w = Math.floor((d - 6) / 2); return [3 + w, (d - 6) & 1]; }
 const SLOTX = [2.7, 4.3, 5.9, 7.5], QY = 7.1;
 const SKIN = ['#F1C9A5', '#E0A878', '#C68642', '#8D5524', '#FFDBAC'];
 const HAIR = ['#2B1B12', '#4A3020', '#1B1B1B', '#8A5A2B', '#C9A15B', '#6B6B6B'];
@@ -722,26 +760,29 @@ function zzz(sx, sy) {
 
 /* ---- decoración de pared ---- */
 function drawWalls() {
+  const T0 = TIER, dx = BW - 10;
   // losa
-  poly([P(0, 8, 0), P(10, 8, 0), P(10, 8, -16), P(0, 8, -16)], '#8097AE');
-  poly([P(10, 0, 0), P(10, 8, 0), P(10, 8, -16), P(10, 0, -16)], '#627A93');
-  poly([P(0, 8, -16), P(10, 8, -16), P(10, 8, -19), P(0, 8, -19)], '#4D647C');
-  poly([P(10, 0, -16), P(10, 8, -16), P(10, 8, -19), P(10, 0, -19)], '#3C5269');
+  poly([P(0, 8, 0), P(BW, 8, 0), P(BW, 8, -16), P(0, 8, -16)], '#8097AE');
+  poly([P(BW, 0, 0), P(BW, 8, 0), P(BW, 8, -16), P(BW, 0, -16)], '#627A93');
+  poly([P(0, 8, -16), P(BW, 8, -16), P(BW, 8, -19), P(0, 8, -19)], '#4D647C');
+  poly([P(BW, 0, -16), P(BW, 8, -16), P(BW, 8, -19), P(BW, 0, -19)], '#3C5269');
   // suelo
-  for (let i = 0; i < 10; i++) for (let j = 0; j < 8; j++)
-    poly([P(i, j, 0), P(i + 1, j, 0), P(i + 1, j + 1, 0), P(i, j + 1, 0)], (i + j) % 2 ? '#DCE5ED' : '#EBF1F6');
+  for (let i = 0; i < Math.ceil(BW); i++) for (let j = 0; j < 8; j++) {
+    const x1 = Math.min(i + 1, BW);
+    poly([P(i, j, 0), P(x1, j, 0), P(x1, j + 1, 0), P(i, j + 1, 0)], (i + j) % 2 ? T0.fl[0] : T0.fl[1]);
+  }
   // alfombras
-  poly([P(2.1, 6.55, 0), P(8.7, 6.55, 0), P(8.7, 7.75, 0), P(2.1, 7.75, 0)], 'rgba(44,106,163,.38)');
-  poly([P(2.25, 6.68, 0), P(8.55, 6.68, 0), P(8.55, 7.62, 0), P(2.25, 7.62, 0)], null, 'rgba(255,255,255,.5)', 1.5);
+  poly([P(2.1, 6.55, 0), P(8.7 + dx, 6.55, 0), P(8.7 + dx, 7.75, 0), P(2.1, 7.75, 0)], 'rgba(44,106,163,.38)');
+  poly([P(2.25, 6.68, 0), P(8.55 + dx, 6.68, 0), P(8.55 + dx, 7.62, 0), P(2.25, 7.62, 0)], null, 'rgba(255,255,255,.5)', 1.5);
   poly([P(0.2, 6.1, 0), P(2.0, 6.1, 0), P(2.0, 8, 0), P(0.2, 8, 0)], 'rgba(44,106,163,.5)');
   // paredes
-  poly([P(0, 0, 0), P(10, 0, 0), P(10, 0, 104), P(0, 0, 104)], '#E9EFF5');
-  poly([P(0, 0, 0), P(0, 8, 0), P(0, 8, 104), P(0, 0, 104)], '#CFDBE7');
-  poly([P(0, 0, 100), P(10, 0, 100), P(10, 0, 106), P(0, 0, 106)], '#fff');
+  poly([P(0, 0, 0), P(BW, 0, 0), P(BW, 0, 104), P(0, 0, 104)], T0.wl[0]);
+  poly([P(0, 0, 0), P(0, 8, 0), P(0, 8, 104), P(0, 0, 104)], T0.wl[1]);
+  poly([P(0, 0, 100), P(BW, 0, 100), P(BW, 0, 106), P(0, 0, 106)], '#fff');
   poly([P(0, 0, 100), P(0, 8, 100), P(0, 8, 106), P(0, 0, 106)], '#F2F6FA');
-  poly([P(0, 0, 0), P(10, 0, 0), P(10, 0, 28), P(0, 0, 28)], '#2C6AA3');
-  poly([P(0, 0, 0), P(0, 8, 0), P(0, 8, 28), P(0, 0, 28)], '#245A8C');
-  poly([P(0, 0, 28), P(10, 0, 28), P(10, 0, 30), P(0, 0, 30)], '#fff');
+  poly([P(0, 0, 0), P(BW, 0, 0), P(BW, 0, 28), P(0, 0, 28)], T0.bd[0]);
+  poly([P(0, 0, 0), P(0, 8, 0), P(0, 8, 28), P(0, 0, 28)], T0.bd[1]);
+  poly([P(0, 0, 28), P(BW, 0, 28), P(BW, 0, 30), P(0, 0, 30)], '#fff');
   poly([P(0, 0, 28), P(0, 8, 28), P(0, 8, 30), P(0, 0, 30)], '#EAF2F9');
   // ventanas (pared izquierda)
   const wins = [[0.6, 1.8], [2.2, 3.4], [3.8, 5.0]];
@@ -749,19 +790,23 @@ function drawWalls() {
     for (const w of wins) {
       const u0 = w[0] * 32, ww = (w[1] - w[0]) * 32;
       g.fillStyle = '#fff'; g.fillRect(u0 - 3, 49, ww + 6, 49);
-      const gr = g.createLinearGradient(0, 95, 0, 52); gr.addColorStop(0, '#CDEBFA'); gr.addColorStop(1, '#8CCBF0');
+      const gr = g.createLinearGradient(0, 95, 0, 52); gr.addColorStop(0, T0.sky[0]); gr.addColorStop(1, T0.sky[1]);
       g.fillStyle = gr; g.fillRect(u0, 52, ww, 43);
+      skyline(u0, ww, wins.indexOf(w));
       g.fillStyle = 'rgba(255,255,255,.45)'; g.beginPath(); g.moveTo(u0 + 4, 52); g.lineTo(u0 + 16, 52); g.lineTo(u0 + 4 + ww * 0.4, 95); g.lineTo(u0, 95); g.lineTo(u0, 80); g.fill();
       g.fillStyle = '#fff'; g.fillRect(u0 + ww / 2 - 1.5, 52, 3, 43); g.fillRect(u0, 72.5, ww, 3);
     }
   });
   // marcos de obras (pared derecha)
-  const wk = S.works.slice(0, 8).reverse();
+  const nfr = Math.min(24, Math.floor((BW - 3.2) / 0.95)), wk = S.works.slice(0, nfr).reverse();
   wallR(() => {
-    for (let k = 0; k < 8; k++) {
+    // placa de la sede
+    { const txt = 'SEDE ' + (S.sedes + 1) + ' · ' + T0.c.toUpperCase(); g.font = '700 9.5px ' + FONT; const w = g.measureText(txt).width + 16, cx0 = (BW * 0.5 + 1.1) * 32;
+      g.fillStyle = '#F2B705'; g.fillRect(cx0 - w / 2, 87, w, 11); g.save(); g.translate(cx0, 89.2); g.scale(1, -1); g.fillStyle = '#123A5E'; g.textAlign = 'center'; g.fillText(txt, 0, -0.6); g.restore(); g.textAlign = 'left'; }
+    for (let k = 0; k < nfr; k++) {
       const cu = (2.15 + k * 0.95) * 32, u0 = cu - 11.5, w = wk[k];
       if (!w) { g.setLineDash([4, 3]); g.strokeStyle = '#9FB1C2'; g.lineWidth = 1.5; g.strokeRect(u0, 52, 23, 30); g.setLineDash([]); continue; }
-      const isNew = k === wk.length - 1 && rt.clock - rt.newWork < 2 && wk.length > 0;
+      const isNew = k === wk.length - 1 && rt.clock - rt.newWork < 2 && wk.length > 0 && S.works.length > 0;
       const blink = isNew && Math.floor(rt.clock * 6) % 2 === 0;
       const ps = isNew ? popS(rt.newWork) : 1;
       g.save(); g.translate(cu, 67); g.scale(ps, ps); g.translate(-cu, -67);
@@ -792,6 +837,29 @@ function drawWalls() {
     cert(5.15 * 32, 'iso'); cert(5.75 * 32, 'homolog');
   });
 }
+function skyline(u0, ww, wi) {
+  const T0 = TIER; g.save(); g.beginPath(); g.rect(u0, 52, ww, 43); g.clip();
+  if (T0.stars) { g.fillStyle = '#fff'; for (let k = 0; k < 9; k++) { const sx = u0 + ((k * 37 + wi * 11) % 100) / 100 * ww, sy = 53 + ((k * 53 + wi * 7) % 100) / 100 * 28; g.globalAlpha = 0.5 + 0.5 * Math.sin(rt.clock * 2 + k + wi); g.fillRect(sx, sy, 1.4, 1.4); } g.globalAlpha = 1; }
+  if (T0.planet) { g.fillStyle = '#3B6FB6'; g.beginPath(); g.arc(u0 + ww * 0.65, 75, 11, 0, 6.3); g.fill(); g.fillStyle = 'rgba(255,255,255,.35)'; g.beginPath(); g.arc(u0 + ww * 0.65 - 3, 71, 5, 0, 6.3); g.fill(); }
+  else if (T0.k <= 1) { g.fillStyle = 'rgba(255,255,255,.75)'; g.beginPath(); g.arc(u0 + ww * 0.3, 63, 5, 0, 6.3); g.arc(u0 + ww * 0.3 + 6, 61, 6, 0, 6.3); g.arc(u0 + ww * 0.3 + 12, 63, 5, 0, 6.3); g.fill(); }
+  // edificios: altura según el nivel de la sede
+  const hs = [[6, 4, 8], [9, 6, 11], [15, 10, 20], [24, 14, 30], [30, 20, 36], [34, 24, 40], [14, 8, 18]][T0.k] || [8, 6, 10];
+  g.fillStyle = T0.bl; let x = u0 - 2, i = 0;
+  while (x < u0 + ww) {
+    const bw = 7 + ((i * 5 + wi * 3) % 4) * 2, bh = hs[(i + wi) % 3] + ((i * 7) % 5);
+    g.fillRect(x, 95 - bh, bw, bh);
+    if (T0.lit) { g.fillStyle = 'rgba(255,214,120,.8)'; for (let yy = 95 - bh + 3; yy < 93; yy += 5) for (let xx = x + 1.5; xx < x + bw - 2; xx += 3.5) if (((xx * 3 + yy) | 0) % 3) g.fillRect(xx, yy, 1.4, 1.8); g.fillStyle = T0.bl; }
+    x += bw + 1; i++;
+  }
+  g.restore();
+}
+function plant(x, y) {
+  const p = P(x, y, 0); g.fillStyle = 'rgba(0,0,0,.14)'; g.beginPath(); g.ellipse(p[0], p[1], 11, 5, 0, 0, 6.3); g.fill();
+  box(x - 0.18, y - 0.18, x + 0.18, y + 0.18, 0, 11, '#B5683A');
+  const c = P(x, y, 11), sw = rt.reduce ? 0 : Math.sin(rt.clock * 1.5 + x) * 1.2;
+  g.fillStyle = '#2E8B57'; for (let k = -2; k <= 2; k++) { g.beginPath(); g.ellipse(c[0] + k * 4.5 + sw * (k / 2), c[1] - 10 - (2 - Math.abs(k)) * 4, 3.4, 10 - Math.abs(k), k * 0.22, 0, 6.3); g.fill(); }
+  g.fillStyle = '#3FAE6A'; g.beginPath(); g.ellipse(c[0], c[1] - 16, 3.2, 9, 0, 0, 6.3); g.fill();
+}
 function popWrapLocal(t0, ax, ay, fn) {
   const s = popS(t0); if (s === 1) { fn(); return; }
   g.save(); g.translate(ax, ay); g.scale(s, s); g.translate(-ax, -ay); fn(); g.restore();
@@ -799,8 +867,8 @@ function popWrapLocal(t0, ax, ay, fn) {
 
 /* ---- escritorios y objetos ---- */
 function seatPos(k) {
-  const d = k >> 1, side = k & 1, col = d % 3, row = Math.floor(d / 3);
-  return [DESKX[col] + (side ? 0.55 : -0.55), DESKY[row] + 0.95];
+  const d = k >> 1, side = k & 1, cr = deskCR(d);
+  return [DESKX[cr[0]] + (side ? 0.55 : -0.55), DESKY[cr[1]] + 0.95];
 }
 function monitors(cx, cy, side, lit, dual) {
   const mx = cx + (side ? 0.55 : -0.55);
@@ -816,8 +884,8 @@ function monitors(cx, cy, side, lit, dual) {
   box(mx - 0.22, cy + 0.12, mx + 0.22, cy + 0.3, 12, 13.2, '#DDE3EA');
 }
 function drawDesk(d, lit, dual, usedSeats) {
-  const col = d % 3, row = Math.floor(d / 3), cx = DESKX[col], cy = DESKY[row];
-  const open = d * 2 < Math.min(12, D.seats);
+  const cr = deskCR(d), cx = DESKX[cr[0]], cy = DESKY[cr[1]];
+  const open = d * 2 < D.seats;
   g.save(); if (!open) g.globalAlpha = 0.45;
   box(cx - 1.1, cy - 0.45, cx - 1.0, cy + 0.45, 0, 12, '#9AA9B8');
   box(cx + 1.0, cy - 0.45, cx + 1.1, cy + 0.45, 0, 12, '#9AA9B8');
@@ -849,8 +917,8 @@ function lock(cx, cy, z) {
 }
 function drawMesa() {
   const T = rt.clock;
-  box(3.4, 5.0, 7.7, 5.95, 0, 16, '#C9A36B');
-  const tx = 3.4, slots = 5;
+  const tx = 3.4, slots = 5 + Math.min(3, S.sedes);
+  box(3.4, 5.0, 3.4 + 0.86 * slots, 5.95, 0, 16, '#C9A36B');
   for (let s = 0; s < slots; s++) {
     const cx = tx + 0.86 * (s + 0.5), cy = 5.475;
     if (s < S.active.length) {
@@ -883,24 +951,32 @@ function drawMesa() {
 }
 function drawProps() {
   const T = rt.clock;
+  g.save(); g.translate((BW - 10) * TW, (BW - 10) * TH);
+  drawPropsE(T);
+  g.restore();
+  drawPropsW(T);
+}
+function drawPropsE(T) {
   if (S.upg.cafe) popWrap(rt.popT.cafe, 9.4, 0.55, 20, () => {
     box(9.0, 0.2, 9.8, 0.9, 0, 20, '#8B6B4A'); box(9.2, 0.28, 9.62, 0.72, 20, 40, '#2D3748');
     const a = P(9.41, 0.72, 34); circ(a[0], a[1], 1.5, '#F0524F');
     box(9.35, 0.6, 9.5, 0.75, 20, 26, '#fff');
     if (!rt.reduce) { g.strokeStyle = 'rgba(255,255,255,.7)'; g.lineWidth = 1.2; const s = P(9.42, 0.68, 28); g.beginPath(); g.moveTo(s[0], s[1]); g.quadraticCurveTo(s[0] + 3 * Math.sin(T * 3), s[1] - 5, s[0], s[1] - 9 - 2 * Math.sin(T * 2)); g.stroke(); }
   });
+  if (S.upg.plotter) popWrap(rt.popT.plotter, 9.55, 2.0, 16, () => {
+    box(9.2, 1.45, 9.9, 2.55, 0, 14, '#E6EBF1'); box(9.25, 1.5, 9.85, 2.5, 14, 20, '#C5CFDA');
+    const a = P(9.55, 2.55, 12); g.fillStyle = '#2A3340'; g.fillRect(a[0] - 9, a[1] - 2, 18, 3);
+    const pa = P(9.55, 2.55, 11); g.fillStyle = '#fff'; g.fillRect(pa[0] - 8, pa[1] + 1, 16, 9 + (Math.sin(T * 2) + 1) * 2);
+    g.strokeStyle = '#2C6AA3'; g.lineWidth = 1; g.strokeRect(pa[0] - 8, pa[1] + 1, 16, 9 + (Math.sin(T * 2) + 1) * 2);
+  });
+}
+function drawPropsW(T) {
   if (S.upg.pc) popWrap(rt.popT.pc, 0.6, 0.6, 22, () => {
     box(0.3, 0.25, 0.9, 0.95, 0, 46, '#3C4658');
     for (let k = 0; k < 5; k++) for (let m = 0; m < 2; m++) {
       const a = P(0.35 + m * 0.25, 0.95, 38 - k * 7), on = Math.sin(T * 4 + k * 1.7 + m * 2.3) > -0.2;
       circ(a[0], a[1], 1.4, on ? (k % 2 ? '#4CD964' : '#F2B705') : '#2A3340');
     }
-  });
-  if (S.upg.plotter) popWrap(rt.popT.plotter, 9.55, 2.0, 16, () => {
-    box(9.2, 1.45, 9.9, 2.55, 0, 14, '#E6EBF1'); box(9.25, 1.5, 9.85, 2.5, 14, 20, '#C5CFDA');
-    const a = P(9.55, 2.55, 12); g.fillStyle = '#2A3340'; g.fillRect(a[0] - 9, a[1] - 2, 18, 3);
-    const pa = P(9.55, 2.55, 11); g.fillStyle = '#fff'; g.fillRect(pa[0] - 8, pa[1] + 1, 16, 9 + (Math.sin(T * 2) + 1) * 2);
-    g.strokeStyle = '#2C6AA3'; g.lineWidth = 1; g.strokeRect(pa[0] - 8, pa[1] + 1, 16, 9 + (Math.sin(T * 2) + 1) * 2);
   });
   if (S.upg.biblioteca) popWrap(rt.popT.biblioteca, 0.4, 1.8, 24, () => {
     box(0.12, 1.0, 0.72, 2.6, 0, 48, '#7A5A2E');
@@ -909,8 +985,9 @@ function drawProps() {
   });
 }
 function drawDoor() {
-  box(9.95, 6.35, 10.15, 6.55, 0, 66, '#2A3340'); box(9.95, 7.65, 10.15, 7.85, 0, 66, '#2A3340');
-  box(9.95, 6.35, 10.15, 7.85, 66, 74, '#F2B705');
+  const x = BW - 0.05;
+  box(x, 6.35, x + 0.2, 6.55, 0, 66, '#2A3340'); box(x, 7.65, x + 0.2, 7.85, 0, 66, '#2A3340');
+  box(x, 6.35, x + 0.2, 7.85, 66, 74, '#F2B705');
 }
 function drawCounter() {
   box(0.5, 6.4, 1.65, 7.9, 0, 22, '#F2B705'); box(0.45, 6.35, 1.7, 7.95, 22, 25, '#fff');
@@ -923,13 +1000,13 @@ function syncClients(dt) {
   for (let i = 0; i < 4; i++) {
     const j = S.queue[i];
     let c = sceneClients.find(q => q.slot === i && q.state !== 'out');
-    if (j && !c) { const sd = hsh(j.id); sceneClients.push({ slot: i, x: 10.7, state: 'in', job: j, seed: sd % 97, skin: SKIN[sd % 5], hair: HAIR[(sd >> 3) % 6], shirt: SHIRTS[(sd >> 6) % 7], prop: sd % 2 }); }
+    if (j && !c) { const sd = hsh(j.id); sceneClients.push({ slot: i, x: BW + 0.7, state: 'in', job: j, seed: sd % 97, skin: SKIN[sd % 5], hair: HAIR[(sd >> 3) % 6], shirt: SHIRTS[(sd >> 6) % 7], prop: sd % 2 }); }
     else if (j && c) c.job = j;
     else if (!j && c) c.state = 'out';
   }
   for (let k = sceneClients.length - 1; k >= 0; k--) {
     const c = sceneClients[k];
-    if (c.state === 'out') { c.x += 3.4 * dt; if (c.x > 10.8) sceneClients.splice(k, 1); }
+    if (c.state === 'out') { c.x += 3.4 * dt; if (c.x > BW + 0.8) sceneClients.splice(k, 1); }
     else { const tx = SLOTX[c.slot]; if (c.x > tx + 0.02) { c.x = Math.max(tx, c.x - 2.8 * dt); c.state = 'in'; } else c.state = 'wait'; }
   }
 }
@@ -955,9 +1032,10 @@ function drawClient(c) {
 }
 function render(dt) {
   const T = rt.clock;
+  BW = 10 + 2.8 * S.wing; TIER = SEDES[S.sedes] || SEDES[0];
   // fondo
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
-  g.fillStyle = '#123A5E'; g.fillRect(0, 0, W, HT);
+  g.fillStyle = TIER.bg; g.fillRect(0, 0, W, HT);
   const gs = 40 * cam.z, ox = ((view.cx - cam.x * cam.z) % gs + gs) % gs, oy = ((view.cy - cam.y * cam.z) % gs + gs) % gs;
   g.strokeStyle = 'rgba(255,255,255,.055)'; g.lineWidth = 1; g.beginPath();
   for (let x = ox; x < W; x += gs) { g.moveTo(x, 0); g.lineTo(x, HT); }
@@ -975,13 +1053,13 @@ function render(dt) {
   // lista de personas sentadas
   const order = ['delineante', 'junior', 'revisor', 'senior'], full = [];
   for (const id of order) for (let k = 0; k < S.staff[id]; k++) full.push(id);
-  const n = full.length, shown = Math.min(n, 12), seats = [];
-  for (let k = 0; k < shown; k++) seats.push(full[n <= 12 ? k : Math.floor(k * n / 12)]);
-  const open = Math.min(12, D.seats), lit = S.active.length > 0, working = lit;
+  const MS = 12 + 4 * S.wing, n = full.length, shown = Math.min(n, MS), seats = [];
+  for (let k = 0; k < shown; k++) seats.push(full[n <= MS ? k : Math.floor(k * n / MS)]);
+  const open = Math.min(MS, D.seats), lit = S.active.length > 0, working = lit;
   const freeIdx = shown < open ? shown : -1;
   items.length = 0;
-  for (let d = 0; d < 6; d++) {
-    const cx = DESKX[d % 3], cy = DESKY[Math.floor(d / 3)];
+  for (let d = 0; d < 6 + 2 * S.wing; d++) {
+    const cr = deskCR(d), cx = DESKX[cr[0]], cy = DESKY[cr[1]];
     items.push({ d: cx + cy, f: () => drawDesk(d, lit, !!S.upg.monitor, shown) });
   }
   // fundador
@@ -997,7 +1075,7 @@ function render(dt) {
     }
   });
   // sillas y empleados
-  for (let k = 0; k < 12; k++) {
+  for (let k = 0; k < MS; k++) {
     const sp = seatPos(k), role = seats[k];
     if (role) {
       items.push({
@@ -1033,29 +1111,34 @@ function render(dt) {
     }
   }
   rt.seatInit = true;
-  // despacho del jefe
-  items.push({
-    d: 9 + 4.9, f: () => {
+  // despacho del jefe (pegado a la pared este)
+  { const dx = BW - 10; items.push({
+    d: 9.4 + dx + 4.3, f: () => {
+      g.save(); g.translate(dx * TW, dx * TH);
       if (S.staff.jefe > 0) {
-        popWrap(rt.popT.jefe, 9, 5, 20, () => {
-          const p = P(9.05, 4.35, 0);
-          frontFigure(p[0], p[1] - 10, { shirt: '#2B3A4F', hair: '#2B1B12', skin: SKIN[1], tie: true, shadow: false, w: 17 });
-          box(8.5, 4.75, 9.7, 5.45, 0, 14, '#8B6B4A'); box(8.5, 4.75, 9.7, 5.45, 14, 15, '#C9A36B');
-          const q = P(9.1, 4.75, 15); g.fillStyle = '#F2B705'; g.fillRect(q[0] - 6, q[1] - 2, 12, 3);
-          zoneAt('emp', 'jefe', 9.05, 4.5, 28, 30);
+        popWrap(rt.popT.jefe, 9.4, 4.3, 20, () => {
+          const p = P(9.4, 3.6, 0);
+          frontFigure(p[0], p[1] - 4, { shirt: '#2B3A4F', hair: '#2B1B12', skin: SKIN[1], tie: true, shadow: false, w: 17 });
+          box(8.9, 4.0, 9.9, 4.6, 0, 14, '#8B6B4A'); box(8.9, 4.0, 9.9, 4.6, 14, 15, '#C9A36B');
+          const q = P(9.4, 4.0, 15); g.fillStyle = '#F2B705'; g.fillRect(q[0] - 6, q[1] - 2, 12, 3);
+          if (S.staff.jefe > 1) { g.font = '700 10px ' + FONT; const t = '×' + S.staff.jefe; g.fillStyle = '#F2B705'; rr(p[0] - 11, p[1] - 56, 22, 13, 4); g.fill(); g.fillStyle = '#123A5E'; g.textAlign = 'center'; g.fillText(t, p[0], p[1] - 46); g.textAlign = 'left'; }
         });
       } else {
-        const a = [P(8.4, 4.5, 0), P(9.8, 4.5, 0), P(9.8, 5.6, 0), P(8.4, 5.6, 0)];
+        const a = [P(8.85, 3.6, 0), P(9.95, 3.6, 0), P(9.95, 4.7, 0), P(8.85, 4.7, 0)];
         g.setLineDash([4, 4]); poly(a, 'rgba(18,58,94,.05)', 'rgba(18,58,94,.35)', 1.5); g.setLineDash([]);
-        const c = P(9.1, 5.05, 24); g.fillStyle = 'rgba(18,58,94,.55)'; g.font = '700 9px ' + FONT; g.textAlign = 'center'; g.fillText('DESPACHO', c[0], c[1]); g.textAlign = 'left';
-        zoneAt('chairL', 99, 9.1, 5.05, 4, 11);
+        const c = P(9.4, 4.15, 24); g.fillStyle = 'rgba(18,58,94,.55)'; g.font = '700 9px ' + FONT; g.textAlign = 'center'; g.fillText('DESPACHO', c[0], c[1]); g.textAlign = 'left';
       }
+      g.restore();
+      if (S.staff.jefe > 0) zoneAt('emp', 'jefe', 9.4 + dx, 3.9, 28, 30); else zoneAt('chairL', 99, 9.4 + dx, 4.15, 4, 11);
     }
-  });
+  }); }
   items.push({ d: 5.55 + 5.475, f: drawMesa });
   items.push({ d: 1.1 + 7.15, f: () => { const p = P(1.1, 6.05, 0); frontFigure(p[0], p[1], { shirt: '#fff', vest: true, hair: '#5A3A22', skin: SKIN[0], seed: 3 }); drawCounter(); } });
   items.push({ d: 5, f: drawProps });
-  items.push({ d: 17.2, f: drawDoor });
+  if (TIER.k >= 1) items.push({ d: 0.35 + 3.3, f: () => plant(0.35, 3.3) });
+  if (TIER.k >= 3) items.push({ d: BW - 0.45 + 2.9, f: () => plant(BW - 0.45, 2.9) });
+  if (TIER.k >= 5) items.push({ d: 2.2 + 7.7, f: () => plant(2.15, 7.75) });
+  items.push({ d: BW + 7.2, f: drawDoor });
   for (const c of sceneClients) items.push({ d: c.x + QY + 0.02, f: () => drawClient(c) });
   // regalo
   if (rt.gift) {
@@ -1083,12 +1166,12 @@ function render(dt) {
 
 /* ---- cámara ---- */
 function fitCam() {
-  const zx = (view.w - 12) / 604, zy = (view.h - 4) / 440;
-  return { x: 32, y: 97, z: clamp(Math.min(zx, zy), 0.4, 1.1) };
+  const zx = (view.w - 12) / (32 * BW + 284), zy = (view.h - 4) / (16 * BW + 280);
+  return { x: 16 * BW - 128, y: 8 * BW + 17, z: clamp(Math.min(zx, zy), 0.2, 1.1) };
 }
-function focusCam() { return { x: 24, y: 128, z: Math.min(0.8, fitCam().z * 1.25 > 0.8 ? 0.8 : fitCam().z * 1.25) }; }
+function focusCam() { return { x: 24 + 8 * (BW - 10), y: 128 + 4 * (BW - 10), z: Math.min(0.8, fitCam().z * 1.25 > 0.8 ? 0.8 : fitCam().z * 1.25) }; }
 function setCamT(o) { camT.x = o.x; camT.y = o.y; camT.z = o.z; if (rt.reduce) { cam.x = o.x; cam.y = o.y; cam.z = o.z; } }
-function clampCam(c) { c.x = clamp(c.x, -300, 360); c.y = clamp(c.y, -130, 330); c.z = clamp(c.z, 0.4, 1.7); }
+function clampCam(c) { const e = BW - 10; c.x = clamp(c.x, -300, 360 + 32 * e); c.y = clamp(c.y, -130, 330 + 16 * e); c.z = clamp(c.z, 0.2, 1.7); }
 function updateCam(dt) {
   const k = rt.reduce ? 1 : Math.min(1, dt * 9);
   cam.x += (camT.x - cam.x) * k; cam.y += (camT.y - cam.y) * k; cam.z += (camT.z - cam.z) * k;
@@ -1109,7 +1192,7 @@ cv.addEventListener('pointermove', e => {
   const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
   if (ptrs.size >= 2 && pinch0) {
     const a = [...ptrs.values()], d = Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y);
-    camT.z = clamp(pinch0.z * d / Math.max(10, pinch0.d), 0.4, 1.7); cam.z = camT.z; dragMoved = true; camFree();
+    camT.z = clamp(pinch0.z * d / Math.max(10, pinch0.d), 0.2, 1.7); cam.z = camT.z; dragMoved = true; camFree();
   } else if (ptrs.size === 1) {
     if (!dragMoved && Math.hypot(e.clientX - downPt.x, e.clientY - downPt.y) > 10) dragMoved = true;
     if (dragMoved) { camT.x -= dx / cam.z; camT.y -= dy / cam.z; clampCam(camT); cam.x = camT.x; cam.y = camT.y; camFree(); }
@@ -1117,7 +1200,7 @@ cv.addEventListener('pointermove', e => {
 });
 const upP = e => { ptrs.delete(e.pointerId); if (ptrs.size < 2) pinch0 = null; };
 cv.addEventListener('pointerup', upP); cv.addEventListener('pointercancel', upP);
-cv.addEventListener('wheel', e => { e.preventDefault(); camT.z = clamp(camT.z * (e.deltaY < 0 ? 1.1 : 0.91), 0.4, 1.7); cam.z = camT.z; camFree(); }, { passive: false });
+cv.addEventListener('wheel', e => { e.preventDefault(); camT.z = clamp(camT.z * (e.deltaY < 0 ? 1.1 : 0.91), 0.2, 1.7); cam.z = camT.z; camFree(); }, { passive: false });
 cv.addEventListener('click', e => {
   if (dragMoved) { dragMoved = false; return; }
   onCanvasTap(e.clientX, e.clientY);
@@ -1290,12 +1373,12 @@ function panelJobs() {
   return h;
 }
 function panelTeam() {
-  let h = '<p class="hint">Puestos ocupados: <b>' + D.used + '/' + D.seats + '</b> · Nóminas: <b>' + fmtD(D.pay) + ' €/s</b></p>';
+  let h = '<p class="hint">Puestos ocupados: <b>' + D.used + '/' + D.seats + '</b> · Nóminas: <b>' + fmtD(D.pay) + ' €/s</b>' + (S.sedes ? ' · Jefes: <b>' + S.staff.jefe + '/' + maxOf('jefe') + '</b>' : '') + '</p>';
   for (const r of STAFF) {
     const n = S.staff[r.id], cost = staffCost(r.id), why = hireState(r.id);
     let body = '<div class="cells">' + cell('Cantidad', n) + cell('Producción', r.hs ? fmtD(roleHs(r.id)) + ' h/s' : '—') + cell('Nómina', fmtD(r.pay * n) + ' €/s') + '</div>';
     if (r.mil) body += '<div class="miles">' + MILES.map(m => '<span class="ms' + (n >= m ? ' on' : '') + '">' + m + '</span>').join('') + '<span>×1,5 por hito</span></div>';
-    body += '<div class="desc">' + r.d + (r.hs ? ' Cada uno: +' + fmtD(r.hs * milMult(r.id) * D.prod) + ' h/s.' : '') + '</div>';
+    body += '<div class="desc">' + r.d + (r.id === 'jefe' && maxOf('jefe') > 1 ? ' Cada jefe adicional: +8 % de honorarios y acepta más rápido. Máx. ' + maxOf('jefe') + ' en esta sede.' : '') + (r.hs ? ' Cada uno: +' + fmtD(r.hs * milMult(r.id) * D.prod) + ' h/s.' : '') + '</div>';
     body += '<div class="btns">' + (why ? btn('x', why, null, { dis: true }) : btn('hire:' + r.id, 'Contratar', eur(cost), { pri: true, dis: S.cash < cost })) + '</div>';
     h += card(r.n, 'Coste ' + eur(r.max && n >= r.max ? 0 : cost), body);
   }
@@ -1304,8 +1387,10 @@ function panelTeam() {
 function panelUpg() {
   const oc = offCost(), sc2 = salaCost();
   let h = '<h4 class="sec">Oficina</h4>';
-  h += card('Ampliar la oficina', D.seats + ' puestos', '<div class="desc">+2 puestos de trabajo. Ampliaciones: ' + S.off + '.</div><div class="btns">' + btn('office', 'Ampliar', eur(oc), { pri: true, dis: S.cash < oc }) + '</div>');
-  h += card('Sala de coordinación', D.slots + '/5 proyectos', '<div class="desc">+1 proyecto simultáneo en la mesa.</div><div class="btns">' + (S.sala >= 4 ? btn('x', 'Máximo alcanzado', null, { dis: true }) : btn('sala', 'Construir', eur(sc2), { pri: true, dis: S.cash < sc2 })) + '</div>');
+  const wc = wingCost();
+  h += card('Ampliar la oficina', D.seats + '/' + D.seatCap + ' puestos', '<div class="desc">+2 puestos de trabajo. Ampliaciones: ' + S.off + '.</div><div class="btns">' + (canOffice() ? btn('office', 'Ampliar', eur(oc), { pri: true, dis: S.cash < oc }) : btn('x', canWing() ? 'Sin sitio: construye una nueva ala' : 'Edificio completo', null, { dis: true })) + '</div>');
+  h += card('Nueva ala del edificio', S.wing + '/' + wingMax() + ' alas', '<div class="desc">Añade una columna de mesas: +4 puestos posibles y el edificio se hace más grande.' + (S.wing >= wingMax() && S.sedes < MAXSEDE ? ' Abre una nueva sede para poder construir más alas.' : '') + '</div><div class="btns">' + (canWing() ? btn('wing', 'Construir ala', eur(wc), { pri: true, dis: S.cash < wc }) : btn('x', 'Máximo de esta sede', null, { dis: true })) + '</div>');
+  h += card('Sala de coordinación', D.slots + '/' + (1 + salaMax()) + ' proyectos', '<div class="desc">+1 proyecto simultáneo en la mesa.' + (S.sala >= salaMax() && S.sedes < MAXSEDE ? ' Abre una nueva sede para ampliar la mesa.' : '') + '</div><div class="btns">' + (!canSala() ? btn('x', 'Máximo de esta sede', null, { dis: true }) : btn('sala', 'Construir', eur(sc2), { pri: true, dis: S.cash < sc2 })) + '</div>');
   h += '<h4 class="sec">Herramientas y certificaciones</h4>';
   for (const u of UPG) {
     if (S.upg[u.id]) continue;
@@ -1319,9 +1404,15 @@ function panelUpg() {
 }
 function confirmed(key) { return UI.conf[key] && UI.conf[key] > Date.now(); }
 function panelSede() {
-  const pts = sedePts();
-  let h = '<div class="card"><div class="cells">' + cell('Facturado', eur(S.total)) + cell('Entregas', fmt(S.deliv)) + cell('Revisiones', fmt(S.revs)) + '</div><div class="cells">' + cell('Reputación', fmt(Math.floor(S.rep))) + cell('Sedes', S.sedes) + cell('Bono sedes', '+' + (S.sedes * 25) + ' %') + '</div></div>';
-  h += card('Abrir una nueva sede', pts + ' pts', '<div class="desc">Reinicia caja, personal, mejoras, reputación y proyectos. Conservas sedes, facturado, entregas, objetivos y obras. Cada sede da +25 % de producción permanente. Puntos = √(facturado ÷ 250.000) − sedes.</div><div class="btns">' + (pts < 1 ? btn('x', 'Aún no tienes puntos', null, { dis: true }) : (confirmed('sede') ? btn('sede', '¿Seguro? Toca otra vez para abrir', '+' + pts, { cls: 'warn' }) : btn('sede', 'Abrir una nueva sede', '+' + pts, { pri: true }))) + '</div>');
+  const cur = SEDES[S.sedes], nx = SEDES[S.sedes + 1], n = S.sedes;
+  let h = '<div class="card"><div class="cells">' + cell('Facturado', eur(S.total)) + cell('Entregas', fmt(S.deliv)) + cell('Revisiones', fmt(S.revs)) + '</div><div class="cells">' + cell('Reputación', fmt(Math.floor(S.rep))) + cell('Producción', '+' + (n * 30) + ' %') + cell('Honorarios', '+' + (n * 10) + ' %') + '</div></div>';
+  h += card('Sede actual: ' + esc(cur.c), 'Sede ' + (n + 1) + '/' + (MAXSEDE + 1), '<div class="desc">' + esc(cur.n) + '. Alas: ' + S.wing + '/' + wingMax() + ' · Jefes: hasta ' + maxOf('jefe') + ' · Mesa: hasta ' + (1 + salaMax()) + ' proyectos.</div>');
+  if (nx) {
+    const need = sedeNeed(n), p = clamp(S.total / need, 0, 1), ready = sedeReady(), k = n + 1;
+    const perks = 'Producción +30 %, honorarios +10 %, edificio nuevo en ' + esc(nx.c) + (wingFree(k) > wingFree(n) ? ', con una ala ya construida' : '') + (Math.min(5, 2 + k) > wingMax() ? ', hasta ' + Math.min(5, 2 + k) + ' alas' : '') + (Math.floor(k / 2) > Math.floor(n / 2) && 1 + Math.floor(k / 2) <= 4 ? ', un jefe más' : '') + (k <= 3 ? ', una plaza más en la mesa' : '') + '.';
+    h += card('Próxima sede: ' + esc(nx.c), eur(need), '<div class="desc">«' + esc(nx.n) + '». ' + perks + ' Reinicia caja, personal, mejoras, reputación y proyectos. Conservas sedes, facturado, entregas, objetivos y obras.</div>' + cota(p, false) + '<div class="btns">' + (!ready ? btn('x', 'Te faltan ' + eur(need - S.total) + ' facturados', null, { dis: true }) : (confirmed('sede') ? btn('sede', '¿Seguro? Toca otra vez para abrir', null, { cls: 'warn' }) : btn('sede', 'Abrir sede en ' + esc(nx.c), null, { pri: true }))) + '</div>');
+  } else h += '<p class="hint">Has abierto todas las sedes. Eres un imperio de la ingeniería.</p>';
+  h += '<h4 class="sec">Mapa de sedes</h4><div class="chips">' + SEDES.map((x, i) => '<span' + (i === n ? ' style="outline:2px solid var(--yellow)"' : '') + '>' + (i < n ? '✓ ' : i === n ? '● ' : '') + esc(x.c) + '</span>').join('') + '</div>';
   h += '<h4 class="sec">Obras terminadas <small>' + S.works.length + '/24</small></h4>';
   h += S.works.length ? '<div class="works">' + S.works.map(w => '<div class="wk"><img alt="" src="' + IC[w.lv] + '"><b>' + esc(w.name) + '</b></div>').join('') + '</div>' : '<p class="empty">Aún no has entregado ninguna obra.</p>';
   h += '<h4 class="sec">Partida</h4><div class="btns">' + btn('snd', 'Sonido: ' + (S.sound ? 'activado' : 'desactivado')) + btn('copy', 'Copiar partida') + '</div>';
@@ -1484,6 +1575,7 @@ function act(a) {
     case 'search': searchOthers(); break;
     case 'hire': hire(arg); break;
     case 'office': buyOffice(); break;
+    case 'wing': buyWing(); break;
     case 'sala': buySala(); break;
     case 'upg': buyUpg(arg); break;
     case 'close': closeModal(); break;
@@ -1492,7 +1584,7 @@ function act(a) {
     case 'load': { const v = ($('#codeTa') || {}).value || ''; if (importCode(v)) { saveGame(); resetScene(); H.toast('Partida cargada.', 'ok'); closePanel(); } else H.toast('El código no es válido.', 'err'); break; }
     case 'sede':
       if (!confirmed('sede')) { UI.conf.sede = Date.now() + 4000; } else {
-        UI.conf.sede = 0; const p = openSede(); if (p) { saveGame(); resetScene(); H.cele('Nueva sede abierta', '+' + p + ' sede · +' + (p * 25) + ' % de producción'); sfx('cele'); closePanel(); }
+        UI.conf.sede = 0; const p = openSede(); if (p) { saveGame(); resetScene(); camMode = 'fit'; applyCamMode(); H.cele('Nueva sede: ' + SEDES[S.sedes].c, SEDES[S.sedes].n + ' · +30 % de producción'); sfx('cele'); closePanel(); }
       } break;
     case 'wipe':
       if (!confirmed('wipe')) { UI.conf.wipe = Date.now() + 4000; } else {
@@ -1554,10 +1646,12 @@ H.deliver = (j, fin, rp, late, ix) => {
   sfx('deliver'); rt.bounce[ix || 0] = 0;
 };
 H.giftSpawn = () => {
-  const spots = [[3.0, 4.4], [5.5, 4.35], [8.0, 4.35], [9.3, 3.0], [4.4, 6.45], [6.6, 6.45], [2.6, 5.7]];
+  const spots = [[3.0, 4.4], [5.5, 4.35], [8.0, 4.35], [BW - 0.9, 2.9], [4.4, 6.45], [6.6, 6.45], [2.6, 5.7]];
+  if (S.wing) spots.push([10.6 + 2.8 * (S.wing - 1), 4.4]);
   const s = spots[Math.floor(Math.random() * spots.length)]; rt.gift = { x: s[0], y: s[1], age: 0 };
 };
 
+function fitIfWide() { if (typeof UI !== 'undefined' && (UI.panel || camMode === 'fit')) setCamT(fitCam()); }
 function resetScene() {
   sceneClients.length = 0; rt.seatRole = []; rt.fall = {}; rt.seatInit = false; rt.gift = null; rt.giftNext = 9;
   recalc(); fillQueue(); rt.shown = S.cash; layout(); applyCamMode();
@@ -1654,7 +1748,7 @@ document.addEventListener('contextmenu', e => e.preventDefault());
   const f = focusCam(); camT.x = cam.x = f.x; camT.y = cam.y = f.y; camT.z = cam.z = f.z;
   if (loaded) { const el = (Date.now() - S.seen) / 1000; if (el > 20) showOffline(Math.min(el, 8 * 3600)); }
   rt.eligKey = null; updateElig();
-  window.__game = { get S() { return S; }, D, rt, tick, handTap, acceptJob, hire, buyUpg, saveGame, loadGame, openPanel, closePanel, zones, fmt, simulateOffline, UI, cam, claimGoal, goalInfo, openSede, sedePts, claimGift, onCanvasTap, buyOffice, buySala, importCode, exportCode };
+  window.__game = { STAFF, UPG, staffCost, hireState, offCost, wingCost, salaCost, canOffice, canWing, canSala, buySala, searchOthers, sedeReady, SEDES, sedeNeed, buyWing, wingMax, get S() { return S; }, D, rt, tick, handTap, acceptJob, hire, buyUpg, saveGame, loadGame, openPanel, closePanel, zones, fmt, simulateOffline, UI, cam, claimGoal, goalInfo, openSede, sedePts, claimGift, onCanvasTap, buyOffice, buySala, importCode, exportCode };
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
     addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => { }));
   }

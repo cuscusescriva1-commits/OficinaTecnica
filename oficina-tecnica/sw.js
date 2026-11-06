@@ -1,4 +1,4 @@
-const VERSION = 'oficina-tecnica-v2.1';
+const VERSION = 'oficina-tecnica-v3.0';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
